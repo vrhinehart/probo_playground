@@ -1,6 +1,16 @@
 [project]
-name = "probo_playground"
+name = "probo-playground"
 version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "pytest",
+    "PyYAML",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
