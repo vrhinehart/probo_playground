@@ -10,6 +10,7 @@ Proprioceptive sensors measure the robot's relationship to its past states. This
 
 from abc import ABC, abstractmethod
 from math import pi
+import random
 
 
 class SensorInterface(ABC):
@@ -106,16 +107,18 @@ class WheelEncoder(SensorInterface):
             angular_noise_ratio: proportional noise for angular
         """
         super().__init__(name, robot, interval)
-        # TODO: save all noise constants as properties
-        self.LIN_NOISE = None  # m/s
-        self.ANG_NOISE = None  # rad/s
+        self.LIN_NOISE = lin_noise  # m/s
+        self.ANG_NOISE = ang_noise  # rad/s
 
     def sample(self):
         """
         Sample the robot's linear and angular velocity.
         """
-        # TODO: fill in the function
-        pass
+        true_lin, true_ang = self.robot.true_encoder_differential()
+        noisy_lin = random.gauss(true_lin, self.LIN_NOISE)
+        noisy_ang = random.gauss(true_ang,self.ANG_NOISE)
+        self.last_meas_t = self.robot.env.time
+        return noisy_lin, noisy_ang
 
 
 class LandmarkPinger(SensorInterface):
@@ -139,7 +142,7 @@ class LandmarkPinger(SensorInterface):
         interval=1.0,
         range_noise=0.5,
         range_prop_noise=0.05,
-        bearing_noise=pi / 6,
+        bearing_noise=pi / 20,
         max_range=10.0,
     ):
         """
@@ -152,14 +155,27 @@ class LandmarkPinger(SensorInterface):
         """
         super().__init__(name, robot, interval)
         # TODO: save max range and all noise constants as properties
-        self.MAX_RANGE = None  # meters
-        self.RANGE_NOISE = None  # meters
-        self.RANGE_PROP_NOISE = None
-        self.BEARING_NOISE = None  # radians
+        self.MAX_RANGE = max_range  # meters
+        self.RANGE_NOISE = range_noise  # meters
+        self.RANGE_PROP_NOISE = range_prop_noise
+        self.BEARING_NOISE = bearing_noise  # radians
 
     def sample(self):
         """
         Reports noisy measurements of the bearing and range between the robot and all nearby landmarks.
         """
-        # TODO: fill in the function
-        pass
+        true_prox = self.robot.env.get_proximity_to_landmarks()
+        pings = {}
+        for id, dist in true_prox.items():
+            range, bearing = dist.to_polar()
+            bearing = bearing - self.robot.env.robot_pose.theta
+            if range > self.MAX_RANGE:
+                continue
+            range_noise = random.gauss(0, self.RANGE_NOISE)
+            range_prop_noise = random.gauss(0, self.RANGE_PROP_NOISE)
+            bearing_noise = random.gauss(0, self.BEARING_NOISE)
+            range += range_noise + range*range_prop_noise
+            bearing += bearing_noise
+            pings[id] = (range, bearing)
+        self.last_meas_t = self.robot.env.time
+        return pings
