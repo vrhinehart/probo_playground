@@ -118,7 +118,7 @@ class InteractiveRobotTest:
         if proximity:
             robot_pose = self.env.get_robot_pose()
             for id, dist in proximity.items():
-                self.ax.plot([robot_pose.pos.x, robot_pose.pos.x - dist.x], [robot_pose.pos.y, robot_pose.pos.y - dist.y],
+                self.ax.plot([robot_pose.pos.x, robot_pose.pos.x + dist.x], [robot_pose.pos.y, robot_pose.pos.y + dist.y],
                    'g--', alpha=0.3, linewidth=1)
         
         self.ax.set_title(f'Robot Environment Test (Time: {self.env.time:.1f}s)\n'
@@ -126,7 +126,7 @@ class InteractiveRobotTest:
         self.fig.canvas.draw()
     
     def on_key_press(self, event):
-        step_size = 2.0
+        step_size = (self.env.DIMENSIONS.x_max-self.env.DIMENSIONS.x_min)/500
         angle_step = np.pi / 50
         
         if event.key == 'up':
@@ -154,5 +154,5 @@ class InteractiveRobotTest:
 
 
 if __name__ == '__main__':
-    test = InteractiveRobotTest("diff")
+    test = InteractiveRobotTest("diffno")
     plt.show()

@@ -88,7 +88,9 @@ class Robot:
         dx = x_vel * dt
         dy = y_vel * dt
         dtheta = ang_vel * dt
-        return Position(dx, dy), dtheta
+        move = Position(dx, dy)
+        self.env.robot_step(move, dtheta)
+        return move, dtheta
     
     def true_encoder_differential(self):
         """
