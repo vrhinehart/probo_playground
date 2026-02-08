@@ -1,7 +1,12 @@
 # Probabilistic Robotics Playground: 2D Mobile Robot Simulation Environment
-> **Developed by [your name here!]**
-> 
-> **Contributors:** [anyone you worked with!]
+
+> **Developed by Vaughn Rhinehart**
+
+To run: `uv run -m probo_sim.main`   
+Note the -m for "run as module" and the lack of a .py extension.
+
+The only dependency is you need uv installed on your system.
+https://docs.astral.sh/uv/
 
 ## Repository Overview and Vision
 This repository is meant to be a starting point for creativity and self-guided learning for the _Probabilistic Robotics_ course at Olin College of Engineering, providing an initial skeleton for a mobile robot simulation environment. Assignments throughout the course will revisit this simulator: building out more of its capabilities, utilizing it to investigate particular algorithms and methods, and providing a start for deep dive projects that push the class materials even further.
