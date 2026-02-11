@@ -5,7 +5,7 @@ The Robot class models the robotic agent that explores the world. The robot is r
 """
 
 from probo_sim.environment import Environment
-from probo_sim.sensors import SensorInterface, WheelEncoder, LandmarkPinger
+from probo_sim.sensors import SensorInterface, WheelEncoder, LandmarkPinger, GPS
 from probo_sim.utils import Position
 import numpy as np
 
@@ -27,7 +27,7 @@ class Robot:
             env: the environment this robot is operating in
         """
         self.env = env
-        self.sensors = [WheelEncoder(self), LandmarkPinger(self, max_range=40)]
+        self.sensors = [WheelEncoder(self), LandmarkPinger(self, max_range=40), GPS(self)]
         self.lin_dist = 0
         self.ang_dist = 0
 

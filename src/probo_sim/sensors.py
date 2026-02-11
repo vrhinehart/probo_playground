@@ -78,6 +78,7 @@ class WheelEncoder(SensorInterface):
     """
     This class represents a wheel encoder set that measures the robot's motor speeds.
     Reports noisy estimates of linear and angular velocities.
+    ONLY WORKS with differential updates. Translational updates don't have linear velocity odometry.
 
     Attributes:
         name: string identifier
@@ -179,3 +180,46 @@ class LandmarkPinger(SensorInterface):
             pings[id] = (range, bearing)
         self.last_meas_t = self.robot.env.time
         return pings
+    
+
+class GPS(SensorInterface):
+    """
+    This class represents a sensor that measures the position of the robot.
+
+    Attributes:
+        name: reference identifier
+        robot (Robot): reference robot
+        interval (float): period between measurements
+        x_noise, y_noise: standard deviation of noise distribution
+    """
+
+    def __init__(
+        self,
+        robot,
+        name="gps",
+        interval=1.0,
+        x_noise=0.5,
+        y_noise=0.5,
+    ):
+        """
+        Initialize an instance of the GPS class.
+
+        Args:
+            name (str): reference identifier
+            robot (Robot): reference robot
+            interval (float): period between measurements
+        """
+        super().__init__(name, robot, interval)
+        # TODO: save max range and all noise constants as properties
+        self.x_noise = x_noise
+        self.y_noise = y_noise
+
+    def sample(self):
+        """
+        Returns a tuple of noisy x and y gps reading
+        """
+        true_pos = self.robot.env.robot_pose.pos
+        x_pos = random.gauss(true_pos.x, self.x_noise)
+        y_pos = random.gauss(true_pos.y, self.y_noise)
+        return x_pos, y_pos
+

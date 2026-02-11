@@ -154,5 +154,5 @@ class InteractiveRobotTest:
 
 
 if __name__ == '__main__':
-    test = InteractiveRobotTest("diffno")
+    test = InteractiveRobotTest("diff")
     plt.show()
