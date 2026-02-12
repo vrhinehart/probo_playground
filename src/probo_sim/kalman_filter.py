@@ -34,22 +34,22 @@ class KalmanFilter:
             prior: the initial estimates for each state variable
         """
         # TODO: set the timestep size to the given parameter
-        self.DT: float = None
+        self.DT: float = dt
 
         # TODO: set the state vector to the given prior
-        self.x: np.ndarray = None
+        self.x: np.ndarray = prior
 
         # TODO: set the process model to an identity matrix
-        self.P: np.ndarray = None
+        self.P: np.ndarray = np.eye(3)
 
         # TODO: define the motion model
-        self.F: np.ndarray = None
+        self.F: np.ndarray = np.eye(3)
 
         # TODO: define the control model
-        self.B: np.ndarray = None
+        self.B: np.ndarray = np.diag((dt, dt, dt))
 
         # TODO: define the process noise
-        self.Q: np.ndarray = None
+        self.Q: np.ndarray = self.get_Q()
 
 
     def predict(self, u: np.ndarray):
@@ -62,11 +62,12 @@ class KalmanFilter:
         Args:
             u: the input control vector
         """
-        # TODO: update the state vector using the state transition matrix and the given control input
-        self.x = None
+        # update the state vector using the state transition matrix and the given control input
+        self.x = self.F @ self.x + self.B @ u
 
-        # TODO: update the process model by propagating it through the state transition matrix and adding noise
-        self.P = None
+        self.Q: np.ndarray = self.get_Q()
+        # update the process model by propagating it through the state transition matrix and adding noise
+        self.P = self.F @ self.P @ self.F.T + self.Q
 
         return self.x, self.P
 
@@ -87,20 +88,20 @@ class KalmanFilter:
             H: the measurement model, which relates the state space to the measurement space
             R: the measurement noise model (covariance)
         """
-        # TODO: calculate the total uncertainty in the system
-        S = None
+        # calculate the total uncertainty in the system
+        S = H @ self.P @ H.T + R
 
-        # TODO: calculate the Kalman Gain, AKA the percentage of the total uncertainty that came from the estimate rather than the measurement
-        K = None
+        # calculate the Kalman Gain, AKA the percentage of the total uncertainty that came from the estimate rather than the measurement
+        K = self.P @ H.T @ np.linalg.inv(S)
 
-        # TODO: calculate the residual, AKA the error between the observation and what we expected the observation to be given our estimated state vector
-        y = None
+        # calculate the residual, AKA the error between the observation and what we expected the observation to be given our estimated state vector
+        y = z - H @ self.x
 
-        # TODO: update the state vector
-        self.x = None
+        # update the state vector
+        self.x = self.x + K @ y
 
-        # TODO: update the process model
-        self.P = None
+        # update the process model
+        self.P = self.P - K @ H @ self.P
 
         return self.x, self.P
 
@@ -109,7 +110,7 @@ class KalmanFilter:
         Generate white noise to apply to the process model after each prediction.
         """
         # TODO: explore different standard deviation values for this function!
-        stdev = 0.1
+        stdev = .1
         return np.array(
             [
                 [

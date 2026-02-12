@@ -10,6 +10,7 @@ Proprioceptive sensors measure the robot's relationship to its past states. This
 
 from abc import ABC, abstractmethod
 from math import pi
+import numpy as np
 import random
 
 
@@ -93,7 +94,7 @@ class WheelEncoder(SensorInterface):
         self,
         robot,
         name="wheel_encoder",
-        interval=0.1,
+        interval=0.0001,
         lin_noise=0.05,
         ang_noise=0.03,
     ):
@@ -111,15 +112,19 @@ class WheelEncoder(SensorInterface):
         self.LIN_NOISE = lin_noise  # m/s
         self.ANG_NOISE = ang_noise  # rad/s
 
-    def sample(self):
+    def sample(self):  # pyright: ignore
         """
         Sample the robot's linear and angular velocity.
         """
-        true_lin, true_ang = self.robot.true_encoder_differential()
-        noisy_lin = random.gauss(true_lin, self.LIN_NOISE)
+        # true_lin, true_ang = self.robot.true_encoder_differential()
+        # noisy_lin = random.gauss(true_lin, self.LIN_NOISE)
+        # noisy_ang = random.gauss(true_ang,self.ANG_NOISE)
+        true_vel, true_ang = self.robot.last_vel
+        noisy_x = random.gauss(true_vel.x, self.LIN_NOISE)
+        noisy_y = random.gauss(true_vel.y, self.LIN_NOISE)
         noisy_ang = random.gauss(true_ang,self.ANG_NOISE)
         self.last_meas_t = self.robot.env.time
-        return noisy_lin, noisy_ang
+        return noisy_x, noisy_y, noisy_ang
 
 
 class LandmarkPinger(SensorInterface):
@@ -161,7 +166,7 @@ class LandmarkPinger(SensorInterface):
         self.RANGE_PROP_NOISE = range_prop_noise
         self.BEARING_NOISE = bearing_noise  # radians
 
-    def sample(self):
+    def sample(self):  # pyright: ignore
         """
         Reports noisy measurements of the bearing and range between the robot and all nearby landmarks.
         """
@@ -214,7 +219,11 @@ class GPS(SensorInterface):
         self.x_noise = x_noise
         self.y_noise = y_noise
 
-    def sample(self):
+        self.R = np.diag((self.x_noise ** 2, self.y_noise ** 2))
+        self.H = np.asarray(([1, 0, 0],
+                            [0, 1, 0]))
+
+    def sample(self): # pyright: ignore
         """
         Returns a tuple of noisy x and y gps reading
         """
