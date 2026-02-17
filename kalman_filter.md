@@ -1,4 +1,4 @@
-# Implementing a Linear Kalman Filtering
+# Implementing a Linear Kalman Filter
 
 ## 0. Assignment Introduction
 
@@ -7,14 +7,17 @@
 This assignment has two goals: (1) help you practice and understand the fundamental math behind Kalman Filters, and (2) connect that math to a real-world state estimation scenario represented in our existing simulator. As you work through the assignment, keep both goals in mind, and try to reinforce both! If you find yourself struggling to understand what the math equations mean, or are struggling to translate those equations into code, there are resources listed below to support your learning.
 
 The overall structure of this assignment follows:
-* **Simulator Extensions**: Add a linear control schema for the robot (if not already implemented in the first assignment), and add a "GPS" sensor for this robot
 * **Week 1: Linear (Regular) Kalman Filter**
+    * Adding a linear control schema and GPS sensor to the base simulator
     * Implementing the Prediction Step
     * Implementing the Update Step
 * **Week 2: Extended Kalman Filter**
+    * Adding a nonlinear control schema to the base simulator
     * Implementing the Prediction Step
     * Implementing the Update Step
     * Implementation Comparisons
+
+This file contains the walkthrough for the first two parts of the assignment. Before you begin, make sure your base simulator is working (walthrough in `simulator.md`). The walkthrough for the third part of the assignment, which covers Extended Kalman Filtering, can be found in `extended_kalman_filter.md`.
 
 ### 0.2 Kalman Filtering vs Extended Kalman Filtering
 
@@ -161,7 +164,7 @@ You'll likely see that the Kalman Filter's estimated trajectory isn't perfect, a
 
 > File: `src/kalman_filter.py`
 
-### 2.1 The Update Step Equations
+### 3.1 The Update Step Equations
 
 Let's refamiliarize ourselves with key values of the update step:
 

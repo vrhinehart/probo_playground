@@ -1,4 +1,4 @@
-# Probabilistic Robotics Playground: Linear Kalman Filtering
+# Probabilistic Robotics Playground: Linear and Extended Kalman Filtering
 > **Developed by [your name here!]**
 > 
 > **Contributors:** [anyone you worked with!]
@@ -15,6 +15,7 @@ This repository is meant to be a starting point for creativity and self-guided l
 ├── README.md
 ├── simulator.md
 ├── kalman_filter.md
+├── extended_kalman_filter.md
 ```
 
 `src` houses the source code for this project.
@@ -26,7 +27,7 @@ This repository is meant to be a starting point for creativity and self-guided l
 ## How to Use This Repository
 This repository is a skeleton for you to use as a starting point for your own Kalman Filter! You should use the existing architecture and scaffolding as much as is useful for your learning, and you are welcome to structure the simulator however you see fit. The `src/` folder contains a basic outline of recommended files, classes, and functions, but these are by no means a requirement or a complete pipeline.
 
-If you'd like to follow a more guided walkthrough of how to build your Kalman filter, check out the `kalman_filter.md` file. Reference code is also available on the main branch of this repository in case you get stuck on anything!
+If you'd like to follow a more guided walkthrough of how to build your linear Kalman Filter, check out the `kalman_filter.md` file. For a walkthrough on building the Extended Kalman Filter, check out `extended_kalman_filter.md`.
 
 ## Merging This Repository With Your Repository
 
