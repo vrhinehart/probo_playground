@@ -10,6 +10,7 @@ dependencies = [
     "pandas",
     "pytest",
     "PyYAML",
+    "sympy",
 ]
 
 [tool.pytest.ini_options]

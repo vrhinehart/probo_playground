@@ -14,8 +14,6 @@ from sympy.abc import x, y, v, w, R, theta
 from sympy import Matrix, Symbol
 import random
 
-from utils import wrap_angle
-
 
 class ExtendedKalmanFilter:
     """
@@ -36,32 +34,32 @@ class ExtendedKalmanFilter:
             dt: the length of each timestep, in seconds
             prior: the initial estimates for each state variable-
         """
-        # TODO: set the timestep size to the given parameter
-        self.DT: float = None
+        # set the timestep size to the given parameter
+        self.DT: float = dt
 
-        # TODO: set the state vector to the given prior
-        self.x: np.ndarray = None
+        # set the state vector to the given prior
+        self.x: np.ndarray = prior
 
-        # TODO: set the process model to an identity matrix
-        self.P: np.ndarray = None
+        # set the process model to an identity matrix
+        self.P: np.ndarray = np.eye(3)
 
-        # TODO: define the nonlinear state transition model
+        # define the nonlinear state transition model
         self.f_xu: Matrix = Matrix(
             [
-                [None],  # calculation of x
-                [None],  # calculation of y
-                [None],  # calculation of theta
+                [x + v * sympy.cos(theta) * self.DT],  # calculation of x
+                [y + v * sympy.sin(theta) * self.DT],  # calculation of y
+                [theta + w * self.DT],  # calculation of theta
             ]
         )
 
         # TODO: define the Jacobian of the motion model symbolically
-        self.F: Matrix = None
+        self.F: Matrix = self.f_xu.jacobian(Matrix([x, y, theta]))
 
         # dictionary that maps Sympy symbols to numerical values. we will use these to substitute values into our symbolic matrices!
         self.subs: dict[Symbol, float] = {
-            x: self.x_state[0],
-            y: self.x_state[1],
-            theta: self.x_state[2],
+            x: self.x[0],
+            y: self.x[1],
+            theta: self.x[2],
             v: 0,
             w: 0,
         }
@@ -79,26 +77,26 @@ class ExtendedKalmanFilter:
             u: the input control vector
         """
         # TODO: set the value of each symbolic substitution to the actual numerical value being tracked by the EKF
-        self.subs[x] = None
-        self.subs[y] = None
-        self.subs[theta] = None
-        self.subs[v] = None
-        self.subs[w] = None
+        self.subs[x] = float(self.x[0])
+        self.subs[y] = float(self.x[1])
+        self.subs[theta] = float(self.x[2])
+        self.subs[v] = float(u[0])
+        self.subs[w] = float(u[1])
 
         # TODO: evaluate the nonlinear motion model f(x,u) at the subsitution values
-        fxu_eval = None
+        fxu_eval = sympy.matrix2numpy(self.f_xu.subs(self.subs))
 
         # TODO: evaluate the Jacobian matrix F at the substitution values
-        F_eval = None
+        F_eval = sympy.matrix2numpy(self.F.subs(self.subs))
 
         # TODO: calculate the next state prediction
-        self.x = None
+        self.x = fxu_eval
 
         # TODO: calculate the next covariance prediction
-        self.P = None
+        self.P = F_eval * self.P * F_eval.T + self.get_Q()
 
         # return state vector and state covariance
-        return self.x_state, self.P
+        return self.x, self.P
 
     def update(
         self,

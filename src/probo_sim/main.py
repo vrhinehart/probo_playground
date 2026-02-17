@@ -6,6 +6,7 @@ from probo_sim.environment import Environment
 from probo_sim.robot import Robot
 from probo_sim.utils import Position, Pose, Landmark, Bounds
 from probo_sim.kalman_filter import KalmanFilter
+from probo_sim.extended_kalman_filter import ExtendedKalmanFilter
 import pandas as pd
 import csv
 import numpy as np
@@ -38,6 +39,10 @@ if __name__ == "__main__":
         dt,
         np.asarray((initial_robot_pose.pos.x, initial_robot_pose.pos.y, initial_robot_pose.theta)),
     )
+    ekf = ExtendedKalmanFilter(
+        dt,
+        np.asarray((initial_robot_pose.pos.x, initial_robot_pose.pos.y, initial_robot_pose.theta)),
+    )
     gps = [sensor for sensor in robot.sensors if sensor.name == "gps"]
     gps = gps[0]
 
@@ -63,24 +68,34 @@ if __name__ == "__main__":
         lin_vel = ang_vel = 0
         # iterate through each timestep
         for step in range(int(total_timesteps) + 1):
-            # TODO: take a ground truth snapshot and add it to the history
+            # take a ground truth snapshot and add it to the history
             snapshot = robot.env.take_state_snapshot()
             ground_truth_history.append(snapshot)
-            # TODO: take sensor measurements and add it to the history
+            # take sensor measurements and add it to the history
             sensor_data = robot.take_sensor_measurements()
             sensor_data_history.append(sensor_data)
-            # TODO: call the Kalman Filter prediction step
-            # xy_velocities, theta_velocity = robot.differential_to_translational(lin_vel, ang_vel)
-            encoder_data = sensor_data["wheel_encoder"]
-            kalman_x, kalman_P = kf.predict(np.asarray(encoder_data))
+
+
+            # ekf prediction
+            encoder_data = sensor_data["polar_encoder"]
+            kalman_x, kalman_P = ekf.predict(np.asarray(encoder_data))
             kalman_filter_history.append(kalman_x)
-            #TODO: call the Kalman Filter update step if new sensor data is available
+
+            '''
+            # call the Kalman Filter prediction step
+            encoder_data = sensor_data["trans_encoder"]
+            kalman_x, kalman_P = kf.predict(np.asarray(encoder_data))
+            # call the Kalman Filter update step if new sensor data is available
             try:
                 gps_data = sensor_data["gps"]
                 gps_data = np.asarray(gps_data)
                 kalman_x, kalman_P = kf.update(gps_data, gps.H, gps.R)
             except KeyError:
                 pass
+            kalman_filter_histor.append(kalman_x)
+            '''
+
+
             # TODO: retrieve the next motor command from the input file
             # TODO: execute the motor command
             if float(row["timestamp"]) <= robot.env.time:

@@ -8,7 +8,6 @@ We expect the following control inputs:
 u = [v_x, v_y, w]
 """
 
-from probo_sim.utils import wrap_angle
 import numpy as np
 import random
 
@@ -69,8 +68,6 @@ class KalmanFilter:
         # update the process model by propagating it through the state transition matrix and adding noise
         self.P = self.F @ self.P @ self.F.T + self.Q
 
-        self.x[3] = wrap_angle(self.x[3])
-
         return self.x, self.P
 
     def update(self, z, H, R):
@@ -104,8 +101,6 @@ class KalmanFilter:
 
         # update the process model
         self.P = self.P - K @ H @ self.P
-
-        self.x[3] = wrap_angle(self.x[3])
 
         return self.x, self.P
 

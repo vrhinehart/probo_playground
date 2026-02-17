@@ -81,7 +81,7 @@ class SensorInterface(ABC):
         pass
 
 
-class WheelEncoder(SensorInterface):
+class TransEncoder(SensorInterface):
     """
     This class represents a wheel encoder set that measures the robot's motor speeds.
     Reports noisy estimates of linear and angular velocities.
@@ -99,7 +99,7 @@ class WheelEncoder(SensorInterface):
     def __init__(
         self,
         robot,
-        name="wheel_encoder",
+        name="trans_encoder",
         interval=0.0001,
         lin_noise=0.05,
         ang_noise=0.03,
@@ -125,13 +125,62 @@ class WheelEncoder(SensorInterface):
         # true_lin, true_ang = self.robot.true_encoder_differential()
         # noisy_lin = random.gauss(true_lin, self.LIN_NOISE)
         # noisy_ang = random.gauss(true_ang,self.ANG_NOISE)
-        true_vel, true_ang = self.robot.last_vel
+        true_vel, true_ang = self.robot.last_trans_vel
         noisy_x = random.gauss(true_vel.x, self.LIN_NOISE)
         noisy_y = random.gauss(true_vel.y, self.LIN_NOISE)
         noisy_ang = random.gauss(true_ang,self.ANG_NOISE)
         self.last_meas_t = self.robot.env.time
         return noisy_x, noisy_y, noisy_ang
 
+class PolarEncoder(SensorInterface):
+    """
+    This class represents a wheel encoder set that measures the robot's motor speeds.
+    Reports noisy estimates of linear and angular velocities.
+    ONLY WORKS with differential updates. Translational updates don't have linear velocity odometry.
+
+    Attributes:
+        name: string identifier
+        robot: reference robot
+        interval: period between measurements
+        last_meas_t: time of last measurement
+        LIN_NOISE: absolute noise for linear velocity stdev
+        ANG_NOISE: absolute noise for angular velocity stdev
+    """
+
+    def __init__(
+        self,
+        robot,
+        name="polar_encoder",
+        interval=0.0001,
+        lin_noise=0.05,
+        ang_noise=0.03,
+    ):
+        """
+        Initialize an instance of the WheelEncoder class.
+
+        Args:
+            robot: reference robot
+            name: reference identifier
+            interval: period between measurements
+            linear_noise_ratio: proportional noise for linear velocity
+            angular_noise_ratio: proportional noise for angular
+        """
+        super().__init__(name, robot, interval)
+        self.LIN_NOISE = lin_noise  # m/s
+        self.ANG_NOISE = ang_noise  # rad/s
+
+    def sample(self):  # pyright: ignore
+        """
+        Sample the robot's linear and angular velocity.
+        """
+        # true_lin, true_ang = self.robot.true_encoder_differential()
+        # noisy_lin = random.gauss(true_lin, self.LIN_NOISE)
+        # noisy_ang = random.gauss(true_ang,self.ANG_NOISE)
+        true_vel, true_ang = self.robot.last_polar_vel
+        noisy_vel = random.gauss(true_vel, self.LIN_NOISE)
+        noisy_ang = random.gauss(true_ang,self.ANG_NOISE)
+        self.last_meas_t = self.robot.env.time
+        return noisy_vel, noisy_ang
 
 class LandmarkPinger(SensorInterface):
     """

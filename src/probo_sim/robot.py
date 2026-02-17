@@ -5,7 +5,7 @@ The Robot class models the robotic agent that explores the world. The robot is r
 """
 
 from probo_sim.environment import Environment
-from probo_sim.sensors import SensorInterface, WheelEncoder, LandmarkPinger, GPS
+from probo_sim.sensors import SensorInterface, PolarEncoder, TransEncoder, LandmarkPinger, GPS
 from probo_sim.utils import Position
 import numpy as np
 
@@ -27,10 +27,11 @@ class Robot:
             env: the environment this robot is operating in
         """
         self.env = env
-        self.sensors = [WheelEncoder(self), LandmarkPinger(self, max_range=40), GPS(self)]
+        self.sensors = [TransEncoder(self), LandmarkPinger(self, max_range=40), GPS(self), PolarEncoder(self)]
         self.lin_dist = 0
         self.ang_dist = 0
-        self.last_vel = (Position(0,0),0)
+        self.last_trans_vel = (Position(0,0),0)
+        self.last_polar_vel = (0,0)
 
     def differential_to_translational(self, lin_vel: float, ang_vel: float):
         """
@@ -71,7 +72,8 @@ class Robot:
         self.lin_dist += lin_vel * dt
         self.ang_dist += dtheta
         self.env.robot_step(dist, dtheta)
-        self.last_vel = (Position(dist.x/dt, dist.y/dt), dtheta/dt)
+        self.last_trans_vel = (Position(dist.x/dt, dist.y/dt), dtheta/dt)
+        self.last_polar_vel = (lin_vel, ang_vel)
         return dist, dtheta
 
     def robot_step_translational(self, x_vel: float, y_vel: float, ang_vel: float):

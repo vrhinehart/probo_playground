@@ -6,7 +6,7 @@ The Environment class models the world that the robots navigate in. The world is
 Critically, the environment tracks the robot's state. In this case, the robot's state is a vector that includes three state variables: x position, y position, and heading.
 """
 
-from probo_sim.utils import Position, Pose, Bounds, Landmark, BearingRange, wrap_angle
+from probo_sim.utils import Position, Pose, Bounds, Landmark, BearingRange
 import copy
 
 class Environment:
@@ -61,7 +61,6 @@ class Environment:
         movement = self.make_valid_motion(movement)
         self.robot_pose.pos += movement
         self.robot_pose.theta += dtheta
-        self.robot_pose.theta = wrap_angle(self.robot_pose.theta)
         self.time += self.DT
         pass
 
