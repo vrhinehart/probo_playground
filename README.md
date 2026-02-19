@@ -1,7 +1,10 @@
 # Probabilistic Robotics Playground: Linear Kalman Filtering
 > **Developed by [your name here!]**
 > 
-> **Contributors:** [anyone you worked with!]
+> **Contributors:** Vaughn Rhinehart
+
+To run: 
+uv run -m probo_sim.main
 
 ## Repository Overview and Vision
 This repository is meant to be a starting point for creativity and self-guided learning for the _Probabilistic Robotics_ course at Olin College of Engineering, providing an initial skeleton for a mobile robot simulation environment. The assignment associated with this branch provides extra support for implementing a linear Kalman Filter in the simulator.
