@@ -45,6 +45,9 @@ if __name__ == "__main__":
     )
     gps = [sensor for sensor in robot.sensors if sensor.name == "gps"]
     gps = gps[0]
+    lm_pinger = [sensor for sensor in robot.sensors if sensor.name == "landmark_pinger"]
+    lm_pinger = lm_pinger[0]
+
 
     # set up timekeeping
     total_seconds = 20
@@ -79,7 +82,27 @@ if __name__ == "__main__":
             # ekf prediction
             encoder_data = sensor_data["polar_encoder"]
             kalman_x, kalman_P = ekf.predict(np.asarray(encoder_data))
-            kalman_filter_history.append(kalman_x)
+            # ekf update
+            try:
+                gps_data = sensor_data["gps"]
+                gps_data = np.asarray(gps_data)
+                kalman_x, kalman_P = ekf.update(gps.H, gps.R, gps_data, None)
+            except KeyError:
+                pass
+
+            # try:
+            #     lm_data = sensor_data["landmark_pinger"]
+                
+            #     for id, (dist, bearing) in lm_data.items():
+            #         H = lm_pinger.H_eval(kalman_x, id)
+            #         z = np.asarray([dist, bearing])
+            #         R = lm_pinger.R(z)
+            #         y = lm_pinger.y(z, kalman_x, id)
+            #         kalman_x, kalman_P = ekf.update(H, R, y, None)
+            # except KeyError:
+            #     pass
+            kalman_filter_history.append(kalman_x.flatten())
+
 
             '''
             # call the Kalman Filter prediction step
@@ -175,7 +198,6 @@ if __name__ == "__main__":
     gt_y = [pose.pos.y for pose in gt_poses]
     ax.plot(gt_x, gt_y, '--g.', markersize=5)
 
-    # Plot kalman pos history
     kf_array = np.array(kalman_filter_history)
     ax.plot(kf_array[:,0], kf_array[:,1], '--r.', markersize=5)
 

@@ -153,7 +153,7 @@ class PolarEncoder(SensorInterface):
         name="polar_encoder",
         interval=0.0001,
         lin_noise=0.05,
-        ang_noise=0.03,
+        ang_noise=0.1,
     ):
         """
         Initialize an instance of the WheelEncoder class.
@@ -215,22 +215,22 @@ class LandmarkPinger(SensorInterface):
             interval (float): period between measurements
         """
         super().__init__(name, robot, interval)
-        # TODO: save max range and all noise constants as properties
+        # save max range and all noise constants as properties
         self.MAX_RANGE = max_range  # meters
         self.RANGE_NOISE = range_noise  # meters
         self.RANGE_PROP_NOISE = range_prop_noise
         self.BEARING_NOISE = bearing_noise  # radians
     
-        # TODO: define the nonlinear measurement model symbolically
+        # define the nonlinear measurement model symbolically
         self.h_x: Matrix = Matrix(
             [
-                [None],  # calculation of r (range)
-                [None],  # calculation of phi (bearing)
+                [sympy.sqrt((j - x) ** 2 + (k - y) ** 2)],  # calculation of r (range)
+                [sympy.atan((j - x) / (k - y))],  # calculation of phi (bearing)
             ]
         )
 
-        # TODO: define the Jacobian of h(x) symbolically
-        self.H: Matrix = None
+        # define the Jacobian of h(x) symbolically
+        self.H: Matrix = self.h_x.jacobian(Matrix([x, y, theta]))
 
         self.subs: dict[Symbol, float] = {
             x: 0.0,
@@ -274,7 +274,7 @@ class LandmarkPinger(SensorInterface):
         range_stdev = self.RANGE_NOISE + z[0] * self.RANGE_PROP_NOISE
         return np.diag([range_stdev, bearing_stdev]) ** 2
 
-    def H_eval(self, x, lm_id):
+    def H_eval(self, x_in, lm_id):
         """
         Evaluate the Jacobian of h(x) at x, which reshapes a state vector to be in the observation space. This matrix is used to turn a state prediction into an observation prediction for a specific landmark.
 
@@ -283,45 +283,49 @@ class LandmarkPinger(SensorInterface):
             lm_id: the ID of the landmark that we are predicting an observation of
         """
         # TODO: find the x and y position of the given landmark
-        lm_x = None
-        lm_y = None
+        landmark = [landmark for landmark in self.robot.env.LANDMARKS if landmark.id == lm_id]
+        landmark = landmark[0]
+        lm_x = landmark.pos.x
+        lm_y = landmark.pos.y
 
         # TODO: set the value of each symbolic substitution to the actual numerical value that was passed in
-        self.subs[x] = None
-        self.subs[y] = None
-        self.subs[theta] = None
-        self.subs[j] = None  # note: we use j for landmark x position
-        self.subs[k] = None  # note: we use k for landmark y position
+        self.subs[x] = float(x_in[0])
+        self.subs[y] = float(x_in[1])
+        self.subs[theta] = float(x_in[2])
+        self.subs[j] = float(lm_x)  # note: we use j for landmark x position
+        self.subs[k] = float(lm_y)  # note: we use k for landmark y position
 
         # TODO: evaluate the Jacobian at the subs values and convert it to a numpy array
-        H_eval = None
+        H_eval = sympy.matrix2numpy(self.H.subs(self.subs))
 
         # return
         return H_eval
 
-    def y(self, z, x, lm_id):
+    def y(self, z, x_in, lm_id):
         """
         Calculate the residual between an observation x and a predicted observation derived from a predicted state. The predicted observation is in reference to a specified landmark.
         """
         # TODO: find the x and y position of the given landmark
-        lm_x = None
-        lm_y = None
+        landmark = [landmark for landmark in self.robot.env.LANDMARKS if landmark.id == lm_id]
+        landmark = landmark[0]
+        lm_x = landmark.pos.x
+        lm_y = landmark.pos.y
 
         # TODO: set the value of each symbolic substitution to the actual numerical value that was passed in
-        self.subs[x] = None
-        self.subs[y] = None
-        self.subs[theta] = None
-        self.subs[j] = None  # note: we use j for landmark x position
-        self.subs[k] = None  # note: we use k for landmark y position
+        self.subs[x] = float(x_in[0])
+        self.subs[y] = float(x_in[1]) # type: ignore
+        self.subs[theta] = float(x_in[2])
+        self.subs[j] = float(lm_x)  # note: we use j for landmark x position
+        self.subs[k] = float(lm_y)  # note: we use k for landmark y position
 
         # TODO: evaluate the measurement model at the subs values and convert it to a numpy array
-        hx_eval = None
+        hx_eval = sympy.matrix2numpy(self.h_x.subs(self.subs))
 
         # TODO: calculate the residual
-        y = None
+        y_out = z - hx_eval.flatten()
 
         # return
-        return y
+        return y_out
 
 
 class GPS(SensorInterface):

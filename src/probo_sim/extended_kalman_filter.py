@@ -90,10 +90,10 @@ class ExtendedKalmanFilter:
         F_eval = sympy.matrix2numpy(self.F.subs(self.subs))
 
         # TODO: calculate the next state prediction
-        self.x = fxu_eval
+        self.x = fxu_eval.flatten()
 
         # TODO: calculate the next covariance prediction
-        self.P = F_eval * self.P * F_eval.T + self.get_Q()
+        self.P = F_eval @ self.P @ F_eval.T + self.get_Q()
 
         # return state vector and state covariance
         return self.x, self.P
@@ -103,7 +103,7 @@ class ExtendedKalmanFilter:
         H: np.ndarray,
         R: np.ndarray,
         z: np.ndarray | None,
-        y: np.ndarray | None,
+        y_in: np.ndarray | None,
     ):
         """
         Updates the current state prediction using observations from the environment. The Extended Kalman Filter uses the following update equations:
@@ -123,30 +123,31 @@ class ExtendedKalmanFilter:
             R: the measurement noise model (covariance)
             y: the residual, which is the error between the measured observation and the observation expected by the predicted state
         """
+
         # TODO: calculate the total uncertainty in the system
-        S = None
+        S = H @ self.P @ H.T + R
 
         # TODO: calculate the Kalman Gain
-        K = None
+        K = self.P @ H.T @ np.linalg.inv(S.astype('float64'))
 
-        if y is None:
-            y = z - H @ self.x_state
+        if y_in is None:
+            y_in = z - (H @ self.x)
 
         # TODO: update state vector
-        self.x_state = None
+        self.x = self.x + K @ y_in
 
         # TODO: update process model
-        self.P = None
+        self.P = self.P - K @ H @ self.P
 
         # return state vector and process model
-        return self.x_state, self.P
+        return self.x, self.P
 
     def get_Q(self):
         """
         Generate white noise to apply to the process model after each prediction.
         """
         # TODO: explore different standard deviation values for this function!
-        stdev = 0.1
+        stdev = .0001
         return np.array(
             [
                 [
