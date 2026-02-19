@@ -202,7 +202,7 @@ class GPS(SensorInterface):
         self,
         robot,
         name="gps",
-        interval=1.0,
+        interval=4.0,
         x_noise=0.5,
         y_noise=0.5,
     ):
@@ -230,5 +230,6 @@ class GPS(SensorInterface):
         true_pos = self.robot.env.robot_pose.pos
         x_pos = random.gauss(true_pos.x, self.x_noise)
         y_pos = random.gauss(true_pos.y, self.y_noise)
+        self.last_meas_t = self.robot.env.time
         return x_pos, y_pos
 

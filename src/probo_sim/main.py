@@ -73,7 +73,6 @@ if __name__ == "__main__":
             # xy_velocities, theta_velocity = robot.differential_to_translational(lin_vel, ang_vel)
             encoder_data = sensor_data["wheel_encoder"]
             kalman_x, kalman_P = kf.predict(np.asarray(encoder_data))
-            kalman_filter_history.append(kalman_x)
             #TODO: call the Kalman Filter update step if new sensor data is available
             try:
                 gps_data = sensor_data["gps"]
@@ -81,6 +80,7 @@ if __name__ == "__main__":
                 kalman_x, kalman_P = kf.update(gps_data, gps.H, gps.R)
             except KeyError:
                 pass
+            kalman_filter_history.append(kalman_x)
             # TODO: retrieve the next motor command from the input file
             # TODO: execute the motor command
             if float(row["timestamp"]) <= robot.env.time:
