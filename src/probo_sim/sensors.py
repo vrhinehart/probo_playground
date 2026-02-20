@@ -19,6 +19,8 @@ import sympy
 from sympy.abc import x, y, k, j, theta
 from sympy import symbols, Matrix, Symbol, pprint
 
+from probo_sim.utils import wrap_angle
+
 
 class SensorInterface(ABC):
     """
@@ -117,6 +119,8 @@ class TransEncoder(SensorInterface):
         super().__init__(name, robot, interval)
         self.LIN_NOISE = lin_noise  # m/s
         self.ANG_NOISE = ang_noise  # rad/s
+        self.last_meas_t = self.robot.env.time - 2 * interval
+
 
     def sample(self):  # pyright: ignore
         """
@@ -168,6 +172,8 @@ class PolarEncoder(SensorInterface):
         super().__init__(name, robot, interval)
         self.LIN_NOISE = lin_noise  # m/s
         self.ANG_NOISE = ang_noise  # rad/s
+        self.last_meas_t = self.robot.env.time - 2 * interval
+
 
     def sample(self):  # pyright: ignore
         """
@@ -200,11 +206,11 @@ class LandmarkPinger(SensorInterface):
         self,
         robot,
         name="landmark_pinger",
-        interval=1.0,
+        interval=4.0,
         range_noise=0.5,
         range_prop_noise=0.05,
-        bearing_noise=pi / 20,
-        max_range=10.0,
+        bearing_noise=pi / 100,
+        max_range=50,
     ):
         """
         Initialize an instance of the LandmarkPinger class.
@@ -220,12 +226,15 @@ class LandmarkPinger(SensorInterface):
         self.RANGE_NOISE = range_noise  # meters
         self.RANGE_PROP_NOISE = range_prop_noise
         self.BEARING_NOISE = bearing_noise  # radians
+
+        self.last_meas_t = self.robot.env.time
+
     
         # define the nonlinear measurement model symbolically
         self.h_x: Matrix = Matrix(
             [
                 [sympy.sqrt((j - x) ** 2 + (k - y) ** 2)],  # calculation of r (range)
-                [sympy.atan((j - x) / (k - y))],  # calculation of phi (bearing)
+                [sympy.atan2(k-y,j-x)],  # calculation of phi (bearing)
             ]
         )
 
@@ -248,7 +257,7 @@ class LandmarkPinger(SensorInterface):
             pings = {}
             for id, dist in true_prox.items():
                 range, bearing = dist.to_polar()
-                bearing = bearing - self.robot.env.robot_pose.theta
+                #bearing = bearing - self.robot.env.robot_pose.theta
                 if range > self.MAX_RANGE:
                     continue
                 range_noise = random.gauss(0, self.RANGE_NOISE)
@@ -272,7 +281,7 @@ class LandmarkPinger(SensorInterface):
         """
         bearing_stdev = self.BEARING_NOISE
         range_stdev = self.RANGE_NOISE + z[0] * self.RANGE_PROP_NOISE
-        return np.diag([range_stdev, bearing_stdev]) ** 2
+        return np.diag([range_stdev ** 2, bearing_stdev ** 2])
 
     def H_eval(self, x_in, lm_id):
         """

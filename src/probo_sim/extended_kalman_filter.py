@@ -134,7 +134,7 @@ class ExtendedKalmanFilter:
             y_in = z - (H @ self.x)
 
         # TODO: update state vector
-        self.x = self.x + K @ y_in
+        self.x = self.x + K @ y_in #pyright: ignore
 
         # TODO: update process model
         self.P = self.P - K @ H @ self.P
@@ -147,23 +147,24 @@ class ExtendedKalmanFilter:
         Generate white noise to apply to the process model after each prediction.
         """
         # TODO: explore different standard deviation values for this function!
-        stdev = .0001
-        return np.array(
-            [
-                [
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                ],
-                [
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                ],
-                [
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                ],
-            ]
-        )
+        stdev = .001
+        # return np.array(
+        #     [
+        #         [
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #         ],
+        #         [
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #         ],
+        #         [
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #         ],
+        #     ]
+        # )
+        return np.diag([random.gauss(0, stdev), random.gauss(0, stdev), random.gauss(0, stdev)])

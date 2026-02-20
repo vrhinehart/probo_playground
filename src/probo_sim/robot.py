@@ -27,7 +27,7 @@ class Robot:
             env: the environment this robot is operating in
         """
         self.env = env
-        self.sensors = [TransEncoder(self), LandmarkPinger(self, max_range=40), GPS(self), PolarEncoder(self)]
+        self.sensors = [TransEncoder(self), LandmarkPinger(self), GPS(self), PolarEncoder(self)]
         self.lin_dist = 0
         self.ang_dist = 0
         self.last_trans_vel = (Position(0,0),0)
@@ -111,7 +111,7 @@ class Robot:
         """
         measurements = {}
         for sensor in self.sensors:
-            if (sensor.last_meas_t + sensor.interval < self.env.time) or self.env.time == 0:
+            if (sensor.last_meas_t + sensor.interval < self.env.time):# or self.env.time == 0:
                 data = sensor.sample()
                 measurements[sensor.name] = data
         return measurements

@@ -59,10 +59,10 @@ if __name__ == "__main__":
     kalman_filter_history = []
 
     # set up input filepath and output filepaths
-    input_commands_filepath = "./data/input.csv"
-    output_ground_truth_filepath = "./data/truth.csv"
-    output_sensor_data_filepath = "./data/sense.csv"
-    output_kalman_filter_filepath = "./data/kalman.csv"
+    input_commands_filepath = "./input/input.csv"
+    output_ground_truth_filepath = "./output/truth.csv"
+    output_sensor_data_filepath = "./output/sense.csv"
+    output_kalman_filter_filepath = "./output/kalman.csv"
 
     # open up the instructions, pop the first
     with open(input_commands_filepath, "r") as cmd:
@@ -82,7 +82,7 @@ if __name__ == "__main__":
             # ekf prediction
             encoder_data = sensor_data["polar_encoder"]
             kalman_x, kalman_P = ekf.predict(np.asarray(encoder_data))
-            # ekf update
+            #ekf update
             try:
                 gps_data = sensor_data["gps"]
                 gps_data = np.asarray(gps_data)
@@ -90,17 +90,16 @@ if __name__ == "__main__":
             except KeyError:
                 pass
 
-            # try:
-            #     lm_data = sensor_data["landmark_pinger"]
-                
-            #     for id, (dist, bearing) in lm_data.items():
-            #         H = lm_pinger.H_eval(kalman_x, id)
-            #         z = np.asarray([dist, bearing])
-            #         R = lm_pinger.R(z)
-            #         y = lm_pinger.y(z, kalman_x, id)
-            #         kalman_x, kalman_P = ekf.update(H, R, y, None)
-            # except KeyError:
-            #     pass
+            try:
+                lm_data = sensor_data["landmark_pinger"]
+                for id, (dist, bearing) in lm_data.items():
+                    H = lm_pinger.H_eval(kalman_x, id)
+                    z = np.asarray([dist, bearing])
+                    R = lm_pinger.R(z)
+                    y = lm_pinger.y(z, kalman_x, id)
+                    kalman_x, kalman_P = ekf.update(H, R, None, y)
+            except KeyError:
+                pass
             kalman_filter_history.append(kalman_x.flatten())
 
 
@@ -118,8 +117,6 @@ if __name__ == "__main__":
             kalman_filter_history.append(kalman_x)
             kalman_filter_histor.append(kalman_x)
             '''
-
-
             # TODO: retrieve the next motor command from the input file
             # TODO: execute the motor command
             if float(row["timestamp"]) <= robot.env.time:
@@ -173,15 +170,14 @@ if __name__ == "__main__":
     for i, sensor_data in enumerate(sensor_data_history):
         robot_state = ground_truth_history[i]
         robot_x, robot_y, robot_hdg = robot_state['pose'].pos.x, robot_state['pose'].pos.y, robot_state['pose'].theta
-        # if 'landmark_pinger' in sensor_data:
-        #     for id, reading in sensor_data['landmark_pinger'].items():
-        #         mag = reading[0]
-        #         hdg = reading[1] + robot_hdg
-        #         dx = mag * math.cos(hdg)
-        #         dy = mag * math.sin(hdg)
-        #         print(mag, hdg, dx, dy, robot_x + dx, robot_y + dy)
-        #         ax.arrow(robot_x, robot_y, dx, dy,
-        #                 head_width=0.5, head_length=0.3, fc='orange', ec='orange', alpha=0.3)
+        if 'landmark_pinger' in sensor_data:
+            for id, reading in sensor_data['landmark_pinger'].items():
+                mag = reading[0]
+                hdg = reading[1] #+ robot_hdg
+                dx = mag * math.cos(hdg)
+                dy = mag * math.sin(hdg)
+                ax.arrow(robot_x, robot_y, dx, dy,
+                        head_width=0.5, head_length=0.3, fc='orange', ec='orange', alpha=0.3)
         if 'gps' in sensor_data:
             gps_x.append(sensor_data["gps"][0])
             gps_y.append(sensor_data["gps"][1])
