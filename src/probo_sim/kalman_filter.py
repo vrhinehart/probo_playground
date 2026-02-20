@@ -41,7 +41,7 @@ class KalmanFilter:
         self.x: np.ndarray = prior
 
         # TODO: set the process model to an identity matrix
-        self.P: np.ndarray = np.eye(3)
+        self.P: np.ndarray = np.eye(3) * 100
 
         # TODO: define the motion model
         self.F: np.ndarray = np.eye(3)
@@ -94,10 +94,6 @@ class KalmanFilter:
 
         # calculate the Kalman Gain, AKA the percentage of the total uncertainty that came from the estimate rather than the measurement
         K = self.P @ H.T @ np.linalg.pinv(S)
-        print(" S: " + str(np.mean(S)))
-        print("S': " + str(np.mean(np.linalg.inv(S))))
-        print(" K: " + str(np.mean(K)))
-        print("")
 
         # calculate the residual, AKA the error between the observation and what we expected the observation to be given our estimated state vector
         y = z - H @ self.x
@@ -117,23 +113,24 @@ class KalmanFilter:
         Generate white noise to apply to the process model after each prediction.
         """
         # TODO: explore different standard deviation values for this function!
-        stdev = .04
-        return np.array(
-            [
-                [
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                ],
-                [
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                ],
-                [
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                    random.gauss(0, stdev),
-                ],
-            ]
-        )
+        stdev = .001
+        # return np.array(
+        #     [
+        #         [
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #         ],
+        #         [
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #         ],
+        #         [
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #             random.gauss(0, stdev),
+        #         ],
+        #     ]
+        # )
+        return np.diag([random.gauss(0, stdev), random.gauss(0, stdev), random.gauss(0, stdev)])

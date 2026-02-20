@@ -95,8 +95,8 @@ class WheelEncoder(SensorInterface):
         robot,
         name="wheel_encoder",
         interval=0.0001,
-        lin_noise=0.05,
-        ang_noise=0.03,
+        lin_noise=1,
+        ang_noise=5,
     ):
         """
         Initialize an instance of the WheelEncoder class.
@@ -202,7 +202,7 @@ class GPS(SensorInterface):
         self,
         robot,
         name="gps",
-        interval=4.0,
+        interval=0.5,
         x_noise=0.5,
         y_noise=0.5,
     ):
