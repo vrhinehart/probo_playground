@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # set up the environment
     # TODO: choose values for each input parameter, using the expected datatype
     dimensions = Bounds(0, 100, 0, 100)
-    dt = 0.1
+    dt = 0.5
     obstacles = [Bounds(10, 30, 10, 30), Bounds(60, 70, 50, 90)]
     landmarks = [Landmark(Position(50,50),1), Landmark(Position(25, 30),2)]
     initial_robot_pose = Pose(Position(50,0),math.pi/2)
@@ -115,6 +115,7 @@ if __name__ == "__main__":
                 kalman_x, kalman_P = kf.update(gps_data, gps.H, gps.R)
             except KeyError:
                 pass
+            kalman_filter_history.append(kalman_x)
             kalman_filter_histor.append(kalman_x)
             '''
 

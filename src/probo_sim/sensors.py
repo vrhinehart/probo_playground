@@ -101,8 +101,8 @@ class TransEncoder(SensorInterface):
         robot,
         name="trans_encoder",
         interval=0.0001,
-        lin_noise=0.05,
-        ang_noise=0.03,
+        lin_noise=1,
+        ang_noise=5,
     ):
         """
         Initialize an instance of the WheelEncoder class.
@@ -343,7 +343,7 @@ class GPS(SensorInterface):
         self,
         robot,
         name="gps",
-        interval=1.0,
+        interval=0.5,
         x_noise=0.5,
         y_noise=0.5,
     ):
@@ -371,5 +371,6 @@ class GPS(SensorInterface):
         true_pos = self.robot.env.robot_pose.pos
         x_pos = random.gauss(true_pos.x, self.x_noise)
         y_pos = random.gauss(true_pos.y, self.y_noise)
+        self.last_meas_t = self.robot.env.time
         return x_pos, y_pos
 
