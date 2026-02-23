@@ -167,4 +167,4 @@ class ExtendedKalmanFilter:
         #         ],
         #     ]
         # )
-        return np.diag([random.gauss(0, stdev), random.gauss(0, stdev), random.gauss(0, stdev)])
+        return np.diag([abs(random.gauss(0, stdev)), abs(random.gauss(0, stdev)), abs(random.gauss(0, stdev))])
