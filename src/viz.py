@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.animation import FuncAnimation, PillowWriter
 import pickle
 from pathlib import Path
-from utils import Pose, Landmark
+from src.utils import Pose, Landmark
 from itertools import product
 import copy
 

@@ -2,7 +2,7 @@
 A simulation environment for a mobile robot operating in two dimensions.
 """
 
-from utils import Position, Pose, BearingRange, Bounds, Landmark
+from src.utils import Position, Pose, BearingRange, Bounds, Landmark
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel
 from itertools import product

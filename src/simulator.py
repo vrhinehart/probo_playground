@@ -2,10 +2,10 @@
 Main file for running the simulator.
 """
 
-from environment import Environment, Field
-from robot import Robot
-from utils import Pose, Position, Bounds, Landmark
-from viz import Visualizer
+from src.environment import Environment, Field
+from src.robot import Robot
+from src.utils import Pose, Position, Bounds, Landmark
+from src.viz import Visualizer
 import pandas as pd
 from pathlib import Path
 import csv, argparse, pickle, yaml

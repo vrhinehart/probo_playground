@@ -1,10 +1,10 @@
 """ """
 
-from utils import NEAR_ZERO, floating_mod_zero, SEED
-from environment import Environment
+from src.utils import NEAR_ZERO, floating_mod_zero, SEED
+from src.environment import Environment
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel
-from sensors import SensorInterface, LandmarkPinger, GPS, Odometry, InsituInstrument
+from src.sensors import SensorInterface, LandmarkPinger, GPS, Odometry, InsituInstrument
 
 import math
 import random
