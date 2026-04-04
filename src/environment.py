@@ -45,11 +45,17 @@ class Field:
     def _initialize_field(self):
         """Initializes the continuous field in an environment."""
         self.kernel = ConstantKernel(1.0, (1e-3, 1e-3)) * RBF([self.lengthscale, self.lengthscale], (self.variance, 100*self.variance))
+            # initializes a kernel that is fundamentally an RBF with the given parameters, but also multiplied by a constant. 
+            # should the constant bounds both be the same? kinda sus
         field = GaussianProcessRegressor(kernel=self.kernel, n_restarts_optimizer=15, random_state=self.random_seed)
+            # initializes the GPR with our kernel
         x, y = np.linspace(self.DIMS.x_min, self.DIMS.x_max, 20), np.linspace(self.DIMS.y_min, self.DIMS.y_max, 20)
+            # creates a sampling space of a grid
         M = np.array(list(product(x, y)))
         init_sample = field.sample_y(M, 1, random_state=self.random_seed)
+            # draw a random sample from the field
         field.fit(M, init_sample)
+            # fit the field to the random sample, baking it into the field from now on.
         self.field = field
 
     def info(self) -> dict:
@@ -236,6 +242,7 @@ class Environment:
         Returns the ground truth field measurement of the robot at the current ground truth pose.
         """
         return self.continuous_field.field.predict(np.asarray((self.agent_pose.pos.x, self.agent_pose.pos.y)).reshape(1,-1))
+            # give the mean of the ground truth distribution at the present ground truth location
 
     # --- Logging ---
     def info(self) -> dict:
